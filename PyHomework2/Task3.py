@@ -1,20 +1,33 @@
-# Задайте список из n чисел последовательности $(1+\frac 1 n)^n$ и выведите на экран их сумму.
-# *Пример:*
-# - Для n = 6: {1: 4, 2: 7, 3: 10, 4: 13, 5: 16, 6: 19}
+# 3 - Палиндромом называется слово, которое в обе стороны читается одинаково: "шалаш", "кабак".
+# А еще есть палиндром числа - смысл также в том, чтобы число в обе стороны читалось одинаково, 
+# но есть одно "но".
+# Если перевернутое число не равно исходному, то они складываются и проверяются на палиндром еще раз.
+# Это происходит до тех пор, пока не будет найден палиндром.
+# Напишите такую программу, которая найдет палиндром введенного пользователем числа.
 
-n = int(input("Введите N: "))
-list = []
-sum = 0
-for i in range(1, n + 1):
-    m = round((1 + 1 / i)**i, 2)
-    sum += m
-    list.append(m)
+def check_input(inputed):
+    is_correct = False
+    while not is_correct:
+        try:
+            number = int(input(f'{inputed}'))
+            is_correct = True
+        except ValueError:
+            print('Некорректный ввод')
+    return number
 
-print(list)
-print(sum)
+num = check_input('Введите число: ')
+pali = str(num)
 
-
-# [round((1 + 1 / x)**x, 2) ]
-
-# print(main(n))
-# print(round(sum(main(n))))
+pali1 = pali
+pali2 = None
+count = 0
+while True:
+    count += 1
+    pali2 = ''.join(reversed(pali1))
+    if pali1 == pali2:
+        print('Палиндром:', pali2)
+        print(f'Количество итераций: {count}')
+        break
+    else:
+        p = int(pali1) + int(pali2)
+        pali1 = str(p)

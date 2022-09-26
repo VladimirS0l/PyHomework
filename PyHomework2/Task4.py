@@ -1,10 +1,15 @@
-#  Задайте список из N элементов, заполненных числами из промежутка [-N, N]. 
-#  Найдите произведение элементов на указанных позициях. Позиции хранятся в файле file.txt в одной строке одно число.
+# Реализуйте выдачу случайного числа
+# не использовать random.randint и вообще библиотеку random
+# Можете использовать xor, биты, библиотеку time или datetime 
+# (миллисекунды или наносекунды) - для задания случайности
+# Учтите, что есть диапазон: от(минимальное) и до (максимальное)
 
-n = int(input("Введите N: "))
+import math, datetime
 
-list = []
-for i in range(-n, n+1):
-    list.append(i)
+def random(_min,_max):
+    d = _max - _min
+    ms = datetime.datetime.today().microsecond/(10**6)
+    print(f'{ms=}')
+    return _min + math.ceil(d * ms)
 
-print(list)
+print(random(1, 20))

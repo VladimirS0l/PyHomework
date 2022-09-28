@@ -16,3 +16,6 @@ result_list =[]
 for i in range((len(list)+1)//2):
     result_list.append(list[i]*list[len(list)-1-i])
 print(result_list)
+
+
+

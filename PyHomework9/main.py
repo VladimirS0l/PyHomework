@@ -1,4 +1,8 @@
-import logging
+
+# import logging
+import menu
+import calculate as rt
+import game as bt
 
 
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
@@ -8,168 +12,66 @@ from telegram.ext import (
     MessageHandler,
     Filters,
     ConversationHandler,
+    CallbackContext,
 )
 
 from config import TOKEN
 
-# Включим ведение журнала
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
-)
-logger = logging.getLogger(__name__)
+first_question, want_play, exit_play, choose_num_can, choose_max_num, start_play, \
+    create_name, step_first_pl, step_second_pl, want_count = range(10)
 
-# Определяем константы этапов разговора
-GENDER, PHOTO, LOCATION, BIO = range(4)
-
-# функция обратного вызова точки входа в разговор
-def start(update, _):
-    # Список кнопок для ответа
-    reply_keyboard = [['Boy', 'Girl', 'Other']]
-    # Создаем простую клавиатуру для ответа
-    markup_key = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
-    # Начинаем разговор с вопроса
+def cancel(update, _):
     update.message.reply_text(
-        'Меня зовут профессор Бот. Я проведу с вами беседу. '
-        'Команда /cancel, чтобы прекратить разговор.\n\n'
-        'Ты мальчик или девочка?',
-        reply_markup=markup_key,)
-    # переходим к этапу `GENDER`, это значит, что ответ
-    # отправленного сообщения в виде кнопок будет список 
-    # обработчиков, определенных в виде значения ключа `GENDER`
-    return GENDER
-
-# Обрабатываем пол пользователя
-def gender(update, _):
-    # определяем пользователя
-    user = update.message.from_user
-    # Пишем в журнал пол пользователя
-    logger.info("Пол %s: %s", user.first_name, update.message.text)
-    # Следующее сообщение с удалением клавиатуры `ReplyKeyboardRemove`
-    update.message.reply_text(
-        'Хорошо. Пришли мне свою фотографию, чтоб я знал как ты '
-        'выглядишь, или отправь /skip, если стесняешься.',
+        'Приходите еще',
         reply_markup=ReplyKeyboardRemove(),
     )
-    # переходим к этапу `PHOTO`
-    return PHOTO
-
-# Обрабатываем фотографию пользователя
-def photo(update, _):
-    # определяем пользователя
-    user = update.message.from_user
-    # захватываем фото 
-    photo_file = update.message.photo[-1].get_file()
-    # скачиваем фото 
-    photo_file.download(f'{user.first_name}_photo.jpg')
-    # Пишем в журнал сведения о фото
-    logger.info("Фотография %s: %s", user.first_name, f'{user.first_name}_photo.jpg')
-    # Отвечаем на сообщение с фото
-    update.message.reply_text(
-        'Великолепно! А теперь пришли мне свое'
-        ' местоположение, или /skip если параноик..'
-    )
-    # переходим к этапу `LOCATION`
-    return LOCATION
-
-# Обрабатываем команду /skip для фото
-def skip_photo(update, _):
-    # определяем пользователя
-    user = update.message.from_user
-    # Пишем в журнал сведения о фото
-    logger.info("Пользователь %s не отправил фото.", user.first_name)
-    # Отвечаем на сообщение с пропущенной фотографией
-    update.message.reply_text(
-        'Держу пари, ты выглядишь великолепно! А теперь пришлите мне'
-        ' свое местоположение, или /skip если параноик.'
-    )
-    # переходим к этапу `LOCATION`
-    return LOCATION
-
-# Обрабатываем местоположение пользователя
-def location(update, _):
-    # определяем пользователя
-    user = update.message.from_user
-    # захватываем местоположение пользователя
-    user_location = update.message.location
-    # Пишем в журнал сведения о местоположении
-    logger.info(
-        "Местоположение %s: %f / %f", user.first_name, user_location.latitude, user_location.longitude)
-    # Отвечаем на сообщение с местоположением
-    update.message.reply_text(
-        'Может быть, я смогу как-нибудь навестить тебя!' 
-        ' Расскажи мне что-нибудь о себе...'
-    )
-    # переходим к этапу `BIO`
-    return BIO
-
-# Обрабатываем команду /skip для местоположения
-def skip_location(update, _):
-    # определяем пользователя
-    user = update.message.from_user
-    # Пишем в журнал сведения о местоположении
-    logger.info("User %s did not send a location.", user.first_name)
-    # Отвечаем на сообщение с пропущенным местоположением
-    update.message.reply_text(
-        'Точно параноик! Ну ладно, тогда расскажи мне что-нибудь о себе...'
-    )
-    # переходим к этапу `BIO`
-    return BIO
-
-# Обрабатываем сообщение с рассказом/биографией пользователя
-def bio(update, _):
-    # определяем пользователя
-    user = update.message.from_user
-    # Пишем в журнал биографию или рассказ пользователя
-    logger.info("Пользователь %s рассказал: %s", user.first_name, update.message.text)
-    # Отвечаем на то что пользователь рассказал.
-    update.message.reply_text('Спасибо! Надеюсь, когда-нибудь снова сможем поговорить.')
-    # Заканчиваем разговор.
     return ConversationHandler.END
 
-# Обрабатываем команду /cancel если пользователь отменил разговор
-def cancel(update, _):
-    # определяем пользователя
-    user = update.message.from_user
-    # Пишем в журнал о том, что пользователь не разговорчивый
-    logger.info("Пользователь %s отменил разговор.", user.first_name)
-    # Отвечаем на отказ поговорить
-    update.message.reply_text(
-        'Мое дело предложить - Ваше отказаться'
-        ' Будет скучно - пиши.', 
-        reply_markup=ReplyKeyboardRemove()
-    )
-    # Заканчиваем разговор.
-    return ConversationHandler.END
+updater = Updater(TOKEN)
+dispatcher = updater.dispatcher
+conv_handler = ConversationHandler(
+    entry_points=[MessageHandler(Filters.text, menu.start)],
+    states={
+        rt.first_question: [MessageHandler(Filters.regex('^Калькулятор|Игра|Выход)$'), menu.answer_fq)],
+        menu.want_count: [MessageHandler(Filters.text, rt.get_rational)],
 
+        # bt.want_play: [MessageHandler(Filters.regex('^Бот|Человек)$'), bt.choose_mod)],
+        # bt.choose_num_can: [MessageHandler(Filters.text, bt.check_num_can)],
+        # bt.choose_max_can: [MessageHandler(Filters.text, bt.check_num_can)],
+        # bt.start_play: [MessageHandler(Filters.text, bt.main_func)],
+        # bt.create_name: [MessageHandler(Filters.text, bt.check_name)],
+        # bt.step_first_pl: [MessageHandler(Filters.text, bt.main_step_first)],
+        # bt.step_second_pl: [MessageHandler(Filters.text, bt.main_step_second)],
 
-if __name__ == '__main__':
-    # Создаем Updater и передаем ему токен вашего бота.
-    updater = Updater(TOKEN)
-    # получаем диспетчера для регистрации обработчиков
-    dispatcher = updater.dispatcher
+        bt.exit_play: [MessageHandler(Filters.text, cancel)],
+    },
+    fallbacks=[CommandHandler('cancel', cancel)]
+)
+# logging.basicConfig(
+#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+# )
+# logger = logging.getLogger(__name__)
 
-    # Определяем обработчик разговоров `ConversationHandler` 
-    # с состояниями GENDER, PHOTO, LOCATION и BIO
-    conv_handler = ConversationHandler( # здесь строится логика разговора
-        # точка входа в разговор
-        entry_points=[CommandHandler('start', start)],
-        # этапы разговора, каждый со своим списком обработчиков сообщений
-        states={
-            GENDER: [MessageHandler(Filters.regex('^(Boy|Girl|Other)$'), gender)],
-            PHOTO: [MessageHandler(Filters.photo, photo), CommandHandler('skip', skip_photo)],
-            LOCATION: [
-                MessageHandler(Filters.location, location),
-                CommandHandler('skip', skip_location),
-            ],
-            BIO: [MessageHandler(Filters.text & ~Filters.command, bio)],
-        },
-        # точка выхода из разговора
-        fallbacks=[CommandHandler('cancel', cancel)],
-    )
+# GAME, CALCULATE = range(2)
 
-    # Добавляем обработчик разговоров `conv_handler`
-    dispatcher.add_handler(conv_handler)
+#     # Определяем обработчик разговоров `ConversationHandler` 
+#     # с состояниями GENDER, PHOTO, LOCATION и BIO
+#     conv_handler = ConversationHandler( # здесь строится логика разговора
+#         # точка входа в разговор
+#         entry_points=[CommandHandler('start', start)],
+#         # этапы разговора, каждый со своим списком обработчиков сообщений
+#         states={
+#             GAME: [MessageHandler(Filters.regex('^(Game|Calculate$'), game, calculate)],
+#             CALCULATE: [MessageHandler(Filters.photo, photo), CommandHandler('skip', skip_photo)],
+            
+#         },
+#         # точка выхода из разговора
+#         fallbacks=[CommandHandler('cancel', cancel)],
+#     )
 
-    # Запуск бота
-    updater.start_polling()
-    updater.idle()
+#     # Добавляем обработчик разговоров `conv_handler`
+dispatcher.add_handler(conv_handler)
+
+# Запуск бота
+updater.start_polling()
+updater.idle()

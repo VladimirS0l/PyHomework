@@ -1,6 +1,6 @@
 from glob import glob
 from random import random
-from matplotlib.pyplot import step
+
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
     Updater,
@@ -106,6 +106,8 @@ def check_max_can(update, _):
 
 def main_func(update, _):
     global temp_list
-
+    try:
+        num = int(update.message.text)
+        if num >
 
 

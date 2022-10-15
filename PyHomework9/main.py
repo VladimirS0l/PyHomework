@@ -32,16 +32,16 @@ dispatcher = updater.dispatcher
 conv_handler = ConversationHandler(
     entry_points=[MessageHandler(Filters.text, menu.start)],
     states={
-        rt.first_question: [MessageHandler(Filters.regex('^Калькулятор|Игра|Выход)$'), menu.answer_fq)],
+        bt.first_question: [MessageHandler(Filters.regex('^Калькулятор|Игра|Выход)$'), menu.answer_fq)],
         menu.want_count: [MessageHandler(Filters.text, rt.get_rational)],
 
-        # bt.want_play: [MessageHandler(Filters.regex('^Бот|Человек)$'), bt.choose_mod)],
-        # bt.choose_num_can: [MessageHandler(Filters.text, bt.check_num_can)],
-        # bt.choose_max_can: [MessageHandler(Filters.text, bt.check_num_can)],
-        # bt.start_play: [MessageHandler(Filters.text, bt.main_func)],
-        # bt.create_name: [MessageHandler(Filters.text, bt.check_name)],
-        # bt.step_first_pl: [MessageHandler(Filters.text, bt.main_step_first)],
-        # bt.step_second_pl: [MessageHandler(Filters.text, bt.main_step_second)],
+        bt.want_play: [MessageHandler(Filters.regex('^Бот|Человек)$'), bt.choose_mod)],
+        bt.choose_num_can: [MessageHandler(Filters.text, bt.check_num_can)],
+        bt.choose_max_can: [MessageHandler(Filters.text, bt.check_max_can)],
+        bt.start_play: [MessageHandler(Filters.text, bt.main_func)],
+        bt.create_name: [MessageHandler(Filters.text, bt.check_name)],
+        bt.step_first_pl: [MessageHandler(Filters.text, bt.main_step_first)],
+        bt.step_second_pl: [MessageHandler(Filters.text, bt.main_step_second)],
 
         bt.exit_play: [MessageHandler(Filters.text, cancel)],
     },

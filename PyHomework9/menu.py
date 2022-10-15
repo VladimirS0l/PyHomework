@@ -1,5 +1,5 @@
 # import logger
-from venv import create
+
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
     Updater,
@@ -38,8 +38,8 @@ def answer_fq(update, _):
         )
         return exit_play
 
-    elif update.message.text == 'Калькулятор':
-        logger.my_log(update, CallbackContext, 'Зашел в калькулятор')
+    if update.message.text == 'Калькулятор':
+        #logger.my_log(update, CallbackContext, 'Зашел в калькулятор')
         update.message.reply_text(
             f'{update.effective_user.first_name}\n'
             'Введите выражение, которое хотите посчитать'),

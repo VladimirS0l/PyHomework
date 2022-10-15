@@ -1,5 +1,5 @@
 #import logger
-from venv import create
+
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
     Updater,
@@ -20,8 +20,8 @@ def get_rational(update, _):
     for i in expr_temp:
         if i.isalpha():
             update.message.replay_text(
-                f'В вашем выражении есть букв, напишите заново без букв')
-        return want_count
+                f'В вашем выражении есть буквы, напишите заново без букв')
+        
 
 # list_dig = []
 # list_operator = []
@@ -74,7 +74,7 @@ def get_rational(update, _):
     update.message.reply_text(
         f'{update.effective_user.first_name}, что вы хотите сделать?',
         reply_markup = markup_key,)
-
+    return want_count
 
 
 # expr_to_calc = '3-4*2' #input('Введите выражение для расчета: ')

@@ -1,10 +1,5 @@
-
-# import logging
-import menu
-import calculate as rt
-import game as bt
-
-
+import logging
+from config import TOKEN
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
     Updater,
@@ -12,66 +7,56 @@ from telegram.ext import (
     MessageHandler,
     Filters,
     ConversationHandler,
-    CallbackContext,
 )
+import menu as me
+import game as g
 
-from config import TOKEN
-
-first_question, want_play, exit_play, choose_num_can, choose_max_num, start_play, \
-    create_name, step_first_pl, step_second_pl, want_count = range(10)
-
-def cancel(update, _):
-    update.message.reply_text(
-        'Приходите еще',
-        reply_markup=ReplyKeyboardRemove(),
-    )
-    return ConversationHandler.END
-
-updater = Updater(TOKEN)
-dispatcher = updater.dispatcher
-conv_handler = ConversationHandler(
-    entry_points=[MessageHandler(Filters.text, menu.start)],
-    states={
-        bt.first_question: [MessageHandler(Filters.regex('^Калькулятор|Игра|Выход)$'), menu.answer_fq)],
-        menu.want_count: [MessageHandler(Filters.text, rt.get_rational)],
-
-        bt.want_play: [MessageHandler(Filters.regex('^Бот|Человек)$'), bt.choose_mod)],
-        bt.choose_num_can: [MessageHandler(Filters.text, bt.check_num_can)],
-        bt.choose_max_can: [MessageHandler(Filters.text, bt.check_max_can)],
-        bt.start_play: [MessageHandler(Filters.text, bt.main_func)],
-        bt.create_name: [MessageHandler(Filters.text, bt.check_name)],
-        bt.step_first_pl: [MessageHandler(Filters.text, bt.main_step_first)],
-        bt.step_second_pl: [MessageHandler(Filters.text, bt.main_step_second)],
-
-        bt.exit_play: [MessageHandler(Filters.text, cancel)],
-    },
-    fallbacks=[CommandHandler('cancel', cancel)]
+# Включим ведение журнала
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
-# logging.basicConfig(
-#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
-# )
-# logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
-# GAME, CALCULATE = range(2)
+# Определяем константы этапов разговора
+CHOICE, CALC, GAME,SWEET, MEN, STEP, START, PL_FIRST, PL_SECOND, EXIT = range(10)
 
-#     # Определяем обработчик разговоров `ConversationHandler` 
-#     # с состояниями GENDER, PHOTO, LOCATION и BIO
-#     conv_handler = ConversationHandler( # здесь строится логика разговора
-#         # точка входа в разговор
-#         entry_points=[CommandHandler('start', start)],
-#         # этапы разговора, каждый со своим списком обработчиков сообщений
-#         states={
-#             GAME: [MessageHandler(Filters.regex('^(Game|Calculate$'), game, calculate)],
-#             CALCULATE: [MessageHandler(Filters.photo, photo), CommandHandler('skip', skip_photo)],
+print('Bot started...')
+
+def main():
+    # Создаем Updater и передаем ему токен вашего бота.
+    updater = Updater(TOKEN)
+    # получаем диспетчера для регистрации обработчиков
+    dispatcher = updater.dispatcher
+
+    # Определяем обработчик разговоров `ConversationHandler` 
+    # с состояниями GENDER, PHOTO, LOCATION и BIO
+    conv_handler = ConversationHandler( # здесь строится логика разговора
+        # точка входа в разговор
+        entry_points=[MessageHandler(Filters.text, me.start)],
+        # этапы разговора, каждый со своим списком обработчиков сообщений
+        states={
+            CHOICE: [MessageHandler(Filters.regex('^(CALC|GAME|Other)$'), me.first_ans)],
+            CALC: [MessageHandler(Filters.text, me.calculate)],
+
+            GAME: [MessageHandler(Filters.regex('^(BOT|MEN)$'), g.game)],
+            SWEET: [MessageHandler(Filters.text, g.choose_num_sweet)],
+            STEP: [MessageHandler(Filters.text, g.one_step)],
+            START: [MessageHandler(Filters.text, g.start_play)],
+            MEN: [MessageHandler(Filters.text, g.player_name)],
+            PL_FIRST: [MessageHandler(Filters.text, g.step_first)],
+            PL_SECOND: [MessageHandler(Filters.text, g.step_second)],
             
-#         },
-#         # точка выхода из разговора
-#         fallbacks=[CommandHandler('cancel', cancel)],
-#     )
+            EXIT: [MessageHandler(Filters.text, me.cancel)]
+        },
+        # точка выхода из разговора
+        fallbacks=[CommandHandler('cancel', me.cancel)],
+    )
 
-#     # Добавляем обработчик разговоров `conv_handler`
-dispatcher.add_handler(conv_handler)
+    # Добавляем обработчик разговоров `conv_handler`
+    dispatcher.add_handler(conv_handler)
 
-# Запуск бота
-updater.start_polling()
-updater.idle()
+    # Запуск бота
+    updater.start_polling()
+    updater.idle()
+
+main()

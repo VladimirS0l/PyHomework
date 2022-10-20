@@ -1,5 +1,4 @@
-# import logger
-
+import logging as log
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
     Updater,
@@ -7,52 +6,120 @@ from telegram.ext import (
     MessageHandler,
     Filters,
     ConversationHandler,
-    CallbackContext,
 )
 
-first_question, want_play, exit_play, choose_num_can, choose_max_num, start_play, \
-    create_name, step_first_pl, step_second_pl, want_count = range(10)
-temp_list = []
-list_name = []
+CHOICE, CALC, GAME,SWEET, MEN, STEP, START, PL_FIRST, PL_SECOND, EXIT = range(10)
 
 def start(update, _):
-    #logger.my_log(update, CallbackContext, 'Зашел в программу')
-    reply_keyboard = [['Калькулятор', 'Игра', 'Выход']]
+    # Список кнопок для ответа
+    reply_keyboard = [['CALC', 'GAME', 'EXIT']]
+    # Создаем простую клавиатуру для ответа
+    markup_key = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+    # Начинаем разговор с вопроса
+    update.message.reply_text(
+        'Меня зовут профессор Бот. '
+        'Команда /cancel, чтобы прекратить разговор.\n\n'
+        'Поиграем или посчитаем?',
+        reply_markup=markup_key,)
+    return CHOICE
+
+def first_ans(update, _):
+    if update.message.text == 'EXIT':
+        update.message.reply_text(f'{update.effective_user.first_name}\n'
+            'Очень жаль заходи еще\n'
+            'я буду рад если ты скажешь Досвидания',
+            reply_markup=ReplyKeyboardRemove(),
+        )
+        return EXIT
+
+    elif update.message.text == 'CALC':
+        update.message.reply_text(f'{update.effective_user.first_name}\n'
+            'Введи уравнение, а я её посчитаю'
+            'Пример: 2*4*6-10/20',
+            reply_markup=ReplyKeyboardRemove(),
+        )
+        return CALC
+
+    elif update.message.text == 'GAME':
+        reply_keyboard = [['BOT', 'MEN']]
+        markup_key = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+        update.message.reply_text(f'{update.effective_user.first_name}\n'
+        'Выбери режим Бот или Человек',
+        reply_markup=markup_key,)
+        return GAME
+
+def calculate(update, _):
+    expr = (update.message.text)
+    list_number = []
+    list_operation = []
+    expr = expr + ' '
+    temp = ''
+    for i in expr:
+        if i.isdigit():
+            temp += i
+        else:
+            list_number.append(temp)
+            temp = ''
+    list_number = list(filter(lambda x: x != '', list_number))
+    list_number = list(map(float, list_number))
+
+
+    list_operation = list(filter(lambda x: x == '/' or x == '*' or x == '+' or x == '-', expr))
+
+    while len(list_operation) > 0:
+        while '/' in list_operation:
+            for i, elem in enumerate(list_operation):
+                if elem == '/':
+                    list_number[i] = list_number[i] / list_number[i+1]
+                    del list_number[i+1]
+                    del list_operation[i]
+                    
+        while '*' in list_operation:
+            for i, elem in enumerate(list_operation):
+                if elem == '*':
+                    list_number[i] = list_number[i] * list_number[i+1]
+                    del list_number[i+1]
+                    del list_operation[i]
+                    
+        while '+' in list_operation:
+            for i, elem in enumerate(list_operation):
+                if elem == '+':
+                    list_number[i] = list_number[i] + list_number[i+1]
+                    del list_number[i+1]
+                    del list_operation[i]
+                    
+        while '-' in list_operation:
+            for i, elem in enumerate(list_operation):
+                if elem == '-':
+                    list_number[i] = list_number[i] - list_number[i+1]
+                    del list_number[i+1]
+                    del list_operation[i]
+                    
+    res_list = list_number[0]
+    
+    update.message.reply_text(f'{update.effective_user.first_name}\n'
+        f'Результат уравнения = {res_list}')
+
+    reply_keyboard = [['CALC', 'GAME', 'EXIT']]
     markup_key = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
     update.message.reply_text(
-        f'Привет {update.effective_user.first_name}!\n'
-        'В этом боте ты можешь:\n'
-        '1) Воспользоваться калькулятором\n'
-        '2) Сыграть в игру\n'
-        '3) Завершить программу\n'
-        '/cancel',
-        reply_markup = markup_key,)
-    return first_question
+        'Что хотите сделать еще?',
+        reply_markup=markup_key,)
+    return CHOICE
 
-def answer_fq(update, _):
-    if update.message.text == 'Выход':
-        #logger.my_log(update, CallbackContext, 'Ни чего не захотел делать')
-        update.message.reply_text(
-        'Заходите еще!',
+
+def cancel(update, _):
+        # определяем пользователя
+    user = update.message.from_user
+    # Пишем в журнал о том, что пользователь не разговорчивый
+    # Отвечаем на отказ поговорить
+    update.message.reply_text(
+        'Мое дело предложить - Ваше отказаться'
+        ' Будет скучно - пиши.', 
         reply_markup=ReplyKeyboardRemove()
-        )
-        return exit_play
-
-    if update.message.text == 'Калькулятор':
-        #logger.my_log(update, CallbackContext, 'Зашел в калькулятор')
-        update.message.reply_text(
-            f'{update.effective_user.first_name}\n'
-            'Введите выражение, которое хотите посчитать'),
-        return want_count
-
-    elif update.message.text == 'Игра':
-        #logger.my_log(update, CallbackContext, 'Зашел в игру')
-        reply_keyboard = [['Бот', 'Человек']]
-        markup_key = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
-        update.message.reply_text(
-            f'{update.effective_user.first_name}\n'
-            'Введите выражение, которое хотите посчитать',
-            reply_markup = markup_key,)
-        return want_count
-
-        
+    )
+    # Заканчиваем разговор.
+    return ConversationHandler.END
+    
+            
+    

@@ -14,7 +14,6 @@ import check
 
 CHOICE, VIEW, FIND, REDACT, ADD, ADD_LN, ADD_N, ADD_NOTE, CHOICE_CON, CH_CON, CHOICE_DEL, DEL, IMPORT, EXPORT, EXIT = range(15)
 
-
 dict_phone = {}
 search_phone = []
 num_phone = 0
@@ -26,8 +25,6 @@ def name(update, _):
         update.message.reply_text('Введите фамилию нового контакта: ')
         return ADD_LN
     else: return ADD
-    # {'name': '37475885', 'lastname': 'Сол', 'notes': 'Попвп'}
-    # <class 'dict'>
 
 def lastname(update, _):
     global dict_phone
@@ -55,8 +52,6 @@ def notes(update, _):
     else: return ADD_NOTE
 
 def read_write(dict_phone, arg):
-    
-    print(dict_phone)
     if arg == "rw":
         try:
             with open('dict_bd.json', 'r') as f:
@@ -75,16 +70,6 @@ def read_write(dict_phone, arg):
         except:
             phone_dir = []
         return phone_dir
-
-# def read_write_change(text, arg):
-#     global num_phone
-#     global search_phone
-#     with open('dict_bd.json', 'r') as f:
-#         phone_dir = json.load(f)
-#     temp_num = phone_dir.index(search_phone[num_phone - 1])
-#     phone_dir[temp_num][arg] = text
-#     with open('dict_bd.json', 'w') as file:
-#             json.dump(phone_dir, file, indent=2, ensure_ascii = False)
 
 def show_all_contact(update, _):
     phone_dir = read_write(dict_phone, 'r')
@@ -131,17 +116,14 @@ def search_contact(update, _):
 
     markup_key = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
     update.message.reply_text(    
-        'Что хотите следать с контактом?',
+        'Что хотите сделать?',
         reply_markup=markup_key)
     return CHOICE_CON
-
 
 #CH_CON
 def choise_contact(update, _):
     global search_phone
     global num_phone
-    print(search_phone)
-    print(type(search_phone))
     num_phone = int(update.message.text)
     
     update.message.reply_text(f'Контакт №{num_phone}: ')
@@ -154,7 +136,7 @@ def choise_contact(update, _):
 
     markup_key = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
     update.message.reply_text(    
-        'Что хотите сделать с контактом?',
+        'Хотите удалить контакт или выйти в главное меню?',
         reply_markup=markup_key)
     return CHOICE_DEL
 

@@ -9,7 +9,6 @@ from telegram.ext import (
     ConversationHandler,
 )
 import menu as me
-import red
 import imp_exp
 import func
 
@@ -48,10 +47,6 @@ def main():
             CH_CON:[MessageHandler(Filters.text, func.choise_contact)],
             CHOICE_DEL: [MessageHandler(Filters.regex('^(Удалить контакт|Главное меню)$'), me.choise_delete)],
             FIND: [MessageHandler(Filters.text, func.search_contact)],
-	        # VIEW: [MessageHandler(Filters.text, func.show_all_contact)],
-            
-	        # IMPORT: [MessageHandler(Filters.text, imp_exp.import_dict)],
-	        # EXPORT: [MessageHandler(Filters.text, imp_exp.export_dict)],
 	        
       	    EXIT: [MessageHandler(Filters.text, me.cancel)]
         },

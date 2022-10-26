@@ -1,4 +1,4 @@
-import logging as log
+
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
     Updater,
@@ -7,22 +7,18 @@ from telegram.ext import (
     Filters,
     ConversationHandler,
 )
-import json
 
 import  imp_exp as ie
 import func
 
 
-CHOICE, VIEW, FIND, REDACT, ADD, ADD_LN, ADD_N, ADD_NOTE, CHOICE_CON, CH_CON, CHOICE_DEL, DEL, IMPORT, EXPORT, EXIT = range(15)
-
-dict_phone = {}
-search_phone = []
-num_phone = 0
+CHOICE, FIND, ADD, ADD_LN, ADD_N, ADD_NOTE, CHOICE_CON, CH_CON, CHOICE_DEL, EXIT = range(10)
 
 def start(update, _):
     reply_keyboard = [['Записать контакт', 'Найти контакт', 'Показать контакты'], ['Импорт БД', 'Экспорт БД', 'Выход']]
     markup_key = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
-    update.message.reply_text(    
+    update.message.reply_text(  
+        'ВАША ЗАПИСНАЯ КНИГА\n\n'  
         'Команда /cancel, закрыть книгу.\n\n'
         'Выберите действие',
         reply_markup=markup_key,)
@@ -86,18 +82,17 @@ def ch_contact(update, _):
         )
         return CH_CON
 
+#CHOICE_DEL
 def choise_delete(update, _):
+    
     if update.message.text == 'Главное меню':
-        update.message.reply_text('Главное меню\n',
-            reply_markup=ReplyKeyboardRemove(),
-        )
+        update.message.reply_text('Главное меню\n')
         return start(update, _)
 
-    elif update.message.text == 'Удалить контакт':
+    elif update.message.text == 'Удалить':
         func.ch_del(update, _)
         update.message.reply_text('Контакт успешно удален')
-        return func.ch_del(update, _)
-
+        return start(update, _)
 
 #EXIT
 def cancel(update, _):

@@ -9,31 +9,19 @@ from telegram.ext import (
     ConversationHandler,
 )
 import menu as me
-import imp_exp
 import func
 
 
-# Включим ведение журнала
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
-)
-logger = logging.getLogger(__name__)
-
-# Определяем константы этапов разговора
-CHOICE, VIEW, FIND, REDACT, ADD, ADD_LN, ADD_N, ADD_NOTE, CHOICE_CON, CH_CON, CHOICE_DEL, DEL, IMPORT, EXPORT, EXIT = range(15)
+CHOICE, FIND, ADD, ADD_LN, ADD_N, ADD_NOTE, CHOICE_CON, CH_CON, CHOICE_DEL, EXIT = range(10)
 
 print('Bot started...')
 
 def main():
-    # Создаем Updater и передаем ему токен вашего бота.
     updater = Updater(TOKEN)
-    # получаем диспетчера для регистрации обработчиков
     dispatcher = updater.dispatcher
 
-    conv_handler = ConversationHandler( # здесь строится логика разговора
-        # точка входа в разговор
+    conv_handler = ConversationHandler( 
         entry_points=[MessageHandler(Filters.text, me.start)],
-        # этапы разговора, каждый со своим списком обработчиков сообщений
         states={
             CHOICE: [MessageHandler(Filters.regex('^(Записать контакт|Найти контакт|'
                                                     'Показать контакты|Импорт БД|'
@@ -45,19 +33,14 @@ def main():
             ADD_NOTE: [MessageHandler(Filters.text, func.notes)],
             CHOICE_CON: [MessageHandler(Filters.regex('^(Выбрать контакт|Найти контакт| Главное меню)$'), me.ch_contact)],
             CH_CON:[MessageHandler(Filters.text, func.choise_contact)],
-            CHOICE_DEL: [MessageHandler(Filters.regex('^(Удалить контакт|Главное меню)$'), me.choise_delete)],
+            CHOICE_DEL: [MessageHandler(Filters.regex('^(Удалить|Главное меню)$'), me.choise_delete)],
             FIND: [MessageHandler(Filters.text, func.search_contact)],
-	        
       	    EXIT: [MessageHandler(Filters.text, me.cancel)]
         },
-        # точка выхода из разговора
         fallbacks=[CommandHandler('cancel', me.cancel)],
     )
 
-    # Добавляем обработчик разговоров `conv_handler`
     dispatcher.add_handler(conv_handler)
-
-    # Запуск бота
     updater.start_polling()
     updater.idle()
 

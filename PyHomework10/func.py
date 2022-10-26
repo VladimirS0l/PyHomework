@@ -1,5 +1,4 @@
-import logging as log
-from sqlalchemy import LABEL_STYLE_TABLENAME_PLUS_COL
+
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
     Updater,
@@ -12,7 +11,7 @@ import json
 import menu
 import check
 
-CHOICE, VIEW, FIND, REDACT, ADD, ADD_LN, ADD_N, ADD_NOTE, CHOICE_CON, CH_CON, CHOICE_DEL, DEL, IMPORT, EXPORT, EXIT = range(15)
+CHOICE, FIND, ADD, ADD_LN, ADD_N, ADD_NOTE, CHOICE_CON, CH_CON, CHOICE_DEL, EXIT = range(10)
 
 dict_phone = {}
 search_phone = []
@@ -58,7 +57,6 @@ def read_write(dict_phone, arg):
                 phone_dir = json.load(f)
         except:
             phone_dir = []
-        print(phone_dir)
         phone_dir.append(dict_phone)
         with open('dict_bd.json', 'w') as file:
             json.dump(phone_dir, file, indent=2, ensure_ascii = False)
@@ -70,6 +68,7 @@ def read_write(dict_phone, arg):
         except:
             phone_dir = []
         return phone_dir
+
 
 def show_all_contact(update, _):
     phone_dir = read_write(dict_phone, 'r')
@@ -86,6 +85,7 @@ def show_all_contact(update, _):
     update.message.reply_text('Перевод в основное меню')
     return menu.start(update, _)
 
+#FIND
 def search_contact(update, _):
     phone_dir = read_write(dict_phone, 'r')
     global search_phone
@@ -100,7 +100,7 @@ def search_contact(update, _):
     
     if len(search_phone) == 0:
         update.message.reply_text('Контакт в записной книге не найден')
-        return menu.answer_search(update, _)
+        return menu.start(update, _)
     
     update.message.reply_text(f'Найдено {len(search_phone)} контактов: ')
     for num, i in enumerate(search_phone):
@@ -109,11 +109,8 @@ def search_contact(update, _):
                                     f'{i["lastname"]}: \n'
                                     f'{i["number"]}: \n'
                                     f' {i["notes"]} \n')
-    
-    
 
     reply_keyboard = [['Выбрать контакт', 'Найти контакт', 'Главное меню']]
-
     markup_key = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
     update.message.reply_text(    
         'Что хотите сделать?',
@@ -127,32 +124,29 @@ def choise_contact(update, _):
     num_phone = int(update.message.text)
     
     update.message.reply_text(f'Контакт №{num_phone}: ')
-    update.message.reply_text(f'Имя: {search_phone["name"]}\n'
-                              f'Фамилия: {search_phone["lastname"]}\n'
-                              f'Телефон: {search_phone["number"]}\n'
-                              f'Заметка: {search_phone["notes"]}\n')
+    update.message.reply_text(f'Имя: {search_phone[num_phone - 1]["name"]}\n'
+                              f'Фамилия: {search_phone[num_phone - 1]["lastname"]}\n'
+                              f'Телефон: {search_phone[num_phone - 1]["number"]}\n'
+                              f'Заметка: {search_phone[num_phone - 1]["notes"]}\n')
 
     reply_keyboard = [['Удалить', 'Главное меню']]
 
     markup_key = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
     update.message.reply_text(    
-        'Хотите удалить контакт или выйти в главное меню?',
+        'Хотите удалить контакт?}',
         reply_markup=markup_key)
     return CHOICE_DEL
-
-
+  
+#DEL
 def ch_del(update, _):
     global num_phone
     global search_phone
-    print(search_phone)
-    print(type(search_phone))
     phone_dir = read_write(dict_phone, 'r')
     phone_dir.remove(search_phone[num_phone - 1])
     search_phone = []
-    with open('dict_db.json', 'w') as file:
+    with open('dict_bd.json', 'w') as file:
         json.dump(phone_dir, file, indent=2, ensure_ascii = False)
-
-
+    
 
 
 

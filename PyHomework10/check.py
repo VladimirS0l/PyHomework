@@ -21,7 +21,7 @@ def check_phone(update, text):
         update.message.text('Введенной Вами значение слишком длинное')
         return False
     for i in text:
-        if i.isalpha():
+        if i.isdigit():
             update.message.text('Введенной Вами значение является текстом')
             return False
     return True

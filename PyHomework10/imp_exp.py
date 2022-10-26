@@ -1,4 +1,4 @@
-import logging as log
+
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
     Updater,
@@ -12,12 +12,11 @@ import menu
 import csv
 import json
 
-CHOICE, VIEW, FIND, REDACT, ADD, ADD_LN, ADD_N, ADD_NOTE, REMOVE, MOVE, IMPORT, EXPORT, EXIT = range(13)
+CHOICE, FIND, ADD, ADD_LN, ADD_N, ADD_NOTE, CHOICE_CON, CH_CON, CHOICE_DEL, EXIT = range(10)
 
 dict_phone = {}
 search_phone = []
 num_phone = 0
-
 
 #EXPORT
 def export_dict(update, _):
